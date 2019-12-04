@@ -93,6 +93,7 @@ for STATIC_BATCH in $STATIC_BATCH_SIZES; do
                          -f ${NAME}.csv >> ${NAME}.log 2>&1
             if (( $? != 0 )); then
                 RET=1
+                cat ${NAME}.log
             fi
             curl localhost:8002/metrics -o ${NAME}.metrics >> ${NAME}.log 2>&1
             if (( $? != 0 )); then
