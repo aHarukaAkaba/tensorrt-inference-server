@@ -66,31 +66,6 @@ WORKDIR /opt/tensorflow
 RUN ./nvbuild.sh --python3.6
 
 ############################################################################
-## PyTorch stage: Use PyTorch container for Caffe2 and libtorch
-############################################################################
-FROM ${PYTORCH_IMAGE} AS trtserver_caffe2
-
-# Copy netdef_backend_c2 into Caffe2 core so it builds into the
-# libtorch library. We want netdef_backend_c2 to build against the
-# Caffe2 protobuf since it interfaces with that code.
-COPY src/backends/caffe2/netdef_backend_c2.* \
-     /opt/pytorch/pytorch/caffe2/core/
-
-# Build same as in pytorch container... except for the NO_DISTRIBUTED
-# line where we turn off features not needed for trtserver This will
-# build the libraries needed by the Caffe2 NetDef backend and the
-# PyTorch libtorch backend.
-WORKDIR /opt/pytorch
-RUN pip uninstall -y torch
-RUN cd pytorch && \
-    TORCH_CUDA_ARCH_LIST="5.2 6.0 6.1 7.0 7.5+PTX" \
-     CMAKE_PREFIX_PATH="$(dirname $(which conda))/../" \
-     USE_DISTRIBUTED=0 USE_MIOPEN=0 USE_NCCL=0 \
-     USE_OPENCV=0 USE_LEVELDB=0 USE_LMDB=0 USE_REDIS=0 \
-     BUILD_TEST=0 \
-     pip install --no-cache-dir -v .
-
-############################################################################
 ## Onnx Runtime stage: Build Onnx Runtime on CUDA 10, CUDNN 7
 ############################################################################
 FROM ${BASE_IMAGE} AS trtserver_onnx
@@ -186,6 +161,11 @@ RUN python3 /workspace/onnxruntime/tools/ci_build/build.py --build_dir /workspac
             --build
 
 ############################################################################
+## PyTorch stage: Use PyTorch container for Caffe2 and libtorch
+############################################################################
+FROM ${PYTORCH_IMAGE} AS trtserver_pytorch
+
+############################################################################
 ## Build stage: Build inference server
 ############################################################################
 FROM ${BASE_IMAGE} AS trtserver_build
@@ -204,6 +184,7 @@ RUN apt-get update && \
             cmake \
             git \
             libgoogle-glog0v5 \
+            libpng-dev \
             libre2-dev \
             libssl-dev \
             libtool \
@@ -234,30 +215,48 @@ RUN cd /opt/tensorrtserver/lib && \
     ln -sf libtensorflow_cc.so.1 libtensorflow_cc.so
 
 # Caffe2 libraries
-COPY --from=trtserver_caffe2 \
+COPY --from=trtserver_pytorch \
      /opt/conda/lib/python3.6/site-packages/torch/lib/libcaffe2_detectron_ops_gpu.so \
      /opt/tensorrtserver/lib/
-COPY --from=trtserver_caffe2 \
+COPY --from=trtserver_pytorch \
      /opt/conda/lib/python3.6/site-packages/torch/lib/libc10.so \
      /opt/tensorrtserver/lib/
-COPY --from=trtserver_caffe2 \
+COPY --from=trtserver_pytorch \
      /opt/conda/lib/python3.6/site-packages/torch/lib/libc10_cuda.so \
      /opt/tensorrtserver/lib/
-COPY --from=trtserver_caffe2 /opt/conda/lib/libmkl_avx2.so /opt/tensorrtserver/lib/
-COPY --from=trtserver_caffe2 /opt/conda/lib/libmkl_core.so /opt/tensorrtserver/lib/
-COPY --from=trtserver_caffe2 /opt/conda/lib/libmkl_def.so /opt/tensorrtserver/lib/
-COPY --from=trtserver_caffe2 /opt/conda/lib/libmkl_gnu_thread.so /opt/tensorrtserver/lib/
-COPY --from=trtserver_caffe2 /opt/conda/lib/libmkl_intel_lp64.so /opt/tensorrtserver/lib/
-COPY --from=trtserver_caffe2 /opt/conda/lib/libmkl_rt.so /opt/tensorrtserver/lib/
-COPY --from=trtserver_caffe2 /opt/conda/lib/libmkl_vml_def.so /opt/tensorrtserver/lib/
+COPY --from=trtserver_pytorch /opt/conda/lib/libmkl_avx2.so /opt/tensorrtserver/lib/
+COPY --from=trtserver_pytorch /opt/conda/lib/libmkl_core.so /opt/tensorrtserver/lib/
+COPY --from=trtserver_pytorch /opt/conda/lib/libmkl_def.so /opt/tensorrtserver/lib/
+COPY --from=trtserver_pytorch /opt/conda/lib/libmkl_gnu_thread.so /opt/tensorrtserver/lib/
+COPY --from=trtserver_pytorch /opt/conda/lib/libmkl_intel_lp64.so /opt/tensorrtserver/lib/
+COPY --from=trtserver_pytorch /opt/conda/lib/libmkl_rt.so /opt/tensorrtserver/lib/
+COPY --from=trtserver_pytorch /opt/conda/lib/libmkl_sequential.so /opt/tensorrtserver/lib/
+COPY --from=trtserver_pytorch /opt/conda/lib/libmkl_vml_def.so /opt/tensorrtserver/lib/
 
-# LibTorch headers and library
-COPY --from=trtserver_caffe2 /opt/conda/lib/python3.6/site-packages/torch/include \
+# LibTorch headers and libraries
+COPY --from=trtserver_pytorch /opt/conda/lib/python3.6/site-packages/torch/include \
      /opt/tensorrtserver/include/torch
-COPY --from=trtserver_caffe2 /opt/conda/lib/python3.6/site-packages/torch/lib/libtorch.so \
+COPY --from=trtserver_pytorch /opt/conda/lib/python3.6/site-packages/torch/lib/libtorch.so \
       /opt/tensorrtserver/lib/
-COPY --from=trtserver_caffe2 /opt/conda/lib/python3.6/site-packages/torch/lib/libcaffe2_nvrtc.so \
+COPY --from=trtserver_pytorch /opt/conda/lib/python3.6/site-packages/torch/lib/libcaffe2_nvrtc.so \
      /opt/tensorrtserver/lib/
+COPY --from=trtserver_pytorch /usr/lib/x86_64-linux-gnu/libopencv_core.so.3.4.0 \
+     /opt/tensorrtserver/lib
+COPY --from=trtserver_pytorch /usr/lib/x86_64-linux-gnu/libopencv_highgui.so.3.4.0 \
+     /opt/tensorrtserver/lib
+COPY --from=trtserver_pytorch /usr/lib/x86_64-linux-gnu/libopencv_video.so.3.4.0 \
+     /opt/tensorrtserver/lib
+COPY --from=trtserver_pytorch /usr/lib/x86_64-linux-gnu/libopencv_videoio.so.3.4.0 \
+     /opt/tensorrtserver/lib
+COPY --from=trtserver_pytorch /usr/lib/x86_64-linux-gnu/libopencv_imgcodecs.so.3.4.0 \
+     /opt/tensorrtserver/lib
+COPY --from=trtserver_pytorch /usr/lib/x86_64-linux-gnu/libopencv_imgproc.so.3.4.0 \
+     /opt/tensorrtserver/lib
+RUN cd /opt/tensorrtserver/lib && \
+    for i in `ls libopencv_*`; do \
+        ln -sf $i $(echo $i | cut -d. -f1-4); \
+        ln -sf $(echo $i | cut -d. -f1-4) $(echo $i | cut -d. -f1-2); \
+    done
 
 # Onnx Runtime headers and library
 # Put include files to same directory as ONNX Runtime changed the include path
@@ -330,7 +329,7 @@ RUN LIBCUDA_FOUND=$(ldconfig -p | grep -v compat | awk '{print $1}' | grep libcu
             cp -r trtis/install/lib /opt/tensorrtserver/. && \
             cp -r trtis/install/include /opt/tensorrtserver/include/trtserver) && \
     (cd /opt/tensorrtserver && ln -sf /workspace/qa qa) && \
-    (cd /opt/tensorrtserver/lib && chmod ugo-w+rx *.so)
+    (cd /opt/tensorrtserver/lib && chmod ugo-w+rx *)
 
 ENV TENSORRT_SERVER_VERSION ${TRTIS_VERSION}
 ENV NVIDIA_TENSORRT_SERVER_VERSION ${TRTIS_CONTAINER_VERSION}
@@ -381,11 +380,13 @@ RUN apt-get update && \
         apt-get install -y --no-install-recommends \
                 libcurl3-dev \
                 libgoogle-glog0v5 \
+                libpng16-16 \
                 libre2-1v5; \
     elif [ $(cat /etc/os-release | grep 'VERSION_ID="18.04"' | wc -l) -ne 0 ]; then \
         apt-get install -y --no-install-recommends \
                 libcurl4-openssl-dev \
                 libgoogle-glog0v5 \
+                libpng16-16 \
                 libre2-4; \
     else \
         echo "Ubuntu version must be either 16.04 or 18.04" && \
@@ -399,7 +400,7 @@ COPY --chown=1000:1000 LICENSE .
 COPY --chown=1000:1000 --from=trtserver_onnx /data/dldt/openvino_2019.1.144/LICENSE LICENSE.openvino
 COPY --chown=1000:1000 --from=trtserver_onnx /workspace/onnxruntime/LICENSE LICENSE.onnxruntime
 COPY --chown=1000:1000 --from=trtserver_tf /opt/tensorflow/tensorflow-source/LICENSE LICENSE.tensorflow
-COPY --chown=1000:1000 --from=trtserver_caffe2 /opt/pytorch/pytorch/LICENSE LICENSE.pytorch
+COPY --chown=1000:1000 --from=trtserver_pytorch /opt/pytorch/pytorch/LICENSE LICENSE.pytorch
 COPY --chown=1000:1000 --from=trtserver_build /opt/tensorrtserver/bin/trtserver bin/
 COPY --chown=1000:1000 --from=trtserver_build /opt/tensorrtserver/lib lib
 COPY --chown=1000:1000 --from=trtserver_build /opt/tensorrtserver/include include

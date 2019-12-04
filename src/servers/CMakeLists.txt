@@ -115,8 +115,8 @@ if(${TRTIS_ENABLE_HTTP} OR ${TRTIS_ENABLE_METRICS})
   )
   if(${TRTIS_ENABLE_HTTP_V2})
     set(
-      HTTP_ENDPOINT_OBJECTS 
-      ${HTTP_ENDPOINT_OBJECTS} 
+      HTTP_ENDPOINT_OBJECTS
+      ${HTTP_ENDPOINT_OBJECTS}
       $<TARGET_OBJECTS:grpc-library>
     )
   endif() # TRTIS_ENABLE_HTTP_V2
@@ -129,8 +129,8 @@ if(${TRTIS_ENABLE_HTTP} OR ${TRTIS_ENABLE_METRICS})
   )
   if(${TRTIS_ENABLE_HTTP_V2})
     set(
-      HTTP_ENDPOINT_LIBRARIES 
-      ${HTTP_ENDPOINT_LIBRARIES} 
+      HTTP_ENDPOINT_LIBRARIES
+      ${HTTP_ENDPOINT_LIBRARIES}
       PRIVATE gRPC::grpc++
       PRIVATE gRPC::grpc
     )
@@ -375,8 +375,14 @@ if(${TRTIS_ENABLE_CAFFE2} OR ${TRTIS_ENABLE_PYTORCH})
     PUBLIC -lmkl_intel_lp64
     PUBLIC -lmkl_rt
     PUBLIC -lmkl_vml_def
+    PUBLIC -lopencv_core
+    PUBLIC -lopencv_highgui
+    PUBLIC -lopencv_video
+    PUBLIC -lopencv_videoio
+    PUBLIC -lopencv_imgcodecs
+    PUBLIC -lopencv_imgproc
   )
-endif() # TRTIS_ENABLE_CAFFE2
+endif() # TRTIS_ENABLE_CAFFE2 || TRTIS_ENABLE_PYTORCH
 
 if(${TRTIS_ENABLE_ONNXRUNTIME})
   target_link_libraries(
