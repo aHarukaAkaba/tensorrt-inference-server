@@ -238,5 +238,129 @@ document. Ensure posted examples are:
   reproduces the problem. Remove all other problems that are not
   related to your request/question.
 
+
+Directory Structure
+-------------------
+
+
+::
+
+  |-- build/
+  |   |-- libevhtp/
+  |   |-- trtis/
+  |   |-- trtis-client/
+  |   |-- trtis-custom-backends/
+  |   |-- trtis-test-utils/
+  |-- deploy/single_server/
+  |   |-- Chart.yaml
+  |   |--values.yaml
+  |   |-- templates/
+  |       |-- deployment.yaml
+  |       |-- service.yaml
+  |-- src/
+  |   |-- backends/
+  |       |-- tensorrt/
+  |           |-- CMakeListes.txt
+  |           |-- autofill.cc
+  |           |-- base_backend.cc
+  |           |-- loader.cc
+  |           |-- logging.cc
+  |           |-- plan_backend.cc
+  |           |-- plan_backend_factory.cc
+  |           |-- plan_utils.cc
+  |       |-- tensorflow/
+  |           |-- CMakeListes.txt
+  |           |-- autofill.cc
+  |           |-- base_backend.cc
+  |           |-- graphdef_backend.cc
+  |           |-- graphdef_backend_factory.cc
+  |           |-- savedmodel_backend.cc
+  |           |-- savedmodel_backend_factory.cc
+  |           |-- tensorflow_backend.cc
+  |           |-- tf_utils.cc
+  |           |-- tf_virtual_device.cc
+  |       |-- pytorch/
+  |           |-- CMakeListes.txt
+  |           |-- autofill.cc
+  |           |-- libtorch_backend.cc
+  |           |-- libtorch_backend_factory.cc
+  |       |-- caffe2/
+  |           |-- CMakeListes.txt
+  |           |-- autofill.cc
+  |           |-- netdef_backend.cc
+  |           |-- netdef_backend_c2.cc
+  |           |-- netdef_backend_factory.cc
+  |       |-- ensemble/
+  |           |-- CMakeListes.txt
+  |           |-- ensemble_backend.cc
+  |           |-- ensemble_backend_factory.cc
+  |       |-- onnx/
+  |           |-- CMakeListes.txt
+  |           |-- autofill.cc
+  |           |-- loader.cc
+  |           |-- onnx_backend.cc
+  |           |-- onnx_backend_factory.cc
+  |           |-- onnx_utils.cc
+  |       |-- custom/
+  |           |-- CMakeListes.txt
+  |           |-- loader.cc
+  |           |-- custom.cc
+  |           |-- custom_backend.cc
+  |           |-- custom_backend_factory.cc
+  |   |-- core/
+  |       |-- CMakeListes.txt
+  |       |-- api.proto
+  |       |-- grpc_service.proto
+  |       |-- server_status.proto
+  |       |-- autofill.cc
+  |       |-- backend.cc
+  |       |-- backend_context.cc
+  |       |-- constans.cc
+  |       |-- cuda_utils.cc
+  |       |-- dynamic_batch_scheduler.cc
+  |       |-- ensemble_scheduler.cc
+  |       |-- filesystem.cc
+  |       |-- label_provider.cc
+  |       |-- logging.cc
+  |       |-- metric_model_reporter.cc
+  |       |-- metrics.cc
+  |       |-- model_config.cc
+  |       |-- model_config_cuda.cc
+  |       |-- model_config_utils.cc
+  |       |-- model_repository_manager.cc
+  |       |-- pinned_memory_manager.cc
+  |       |-- provider.cc
+  |       |-- provider_utiles.cc
+  |       |-- request_status.cc
+  |       |-- scheduler.cc
+  |       |-- sequence_batch_scheduler.cc
+  |       |-- server.cc
+  |       |-- server_status.cc
+  |       |-- shared_memory_manager.cc
+  |       |-- status.cc
+  |       |-- tracing.cc
+  |       |-- trtserver.cc
+  |   |-- servers/
+  |       |-- CMakeListes.txt
+  |       |-- common.cc
+  |       |-- grpc_server.cc
+  |       |-- http_server.cc
+  |       |-- http_v2_server.cc
+  |       |-- libtrtserver.ldscript
+  |       |-- main.cc
+  |       |-- memory_alloc.cc
+  |       |-- shared_memory_block_manager.cc
+  |       |-- simple.cc
+  |       |-- tracer.cc
+  |   |-- clients/
+  |       |-- c++
+  |       |-- go
+  |       |-- python
+  |   |-- custom/
+  |   |-- test/
+  |-- docs/
+  |-- qa/
+  |-- tools/
+
 .. |License| image:: https://img.shields.io/badge/License-BSD3-lightgrey.svg
    :target: https://opensource.org/licenses/BSD-3-Clause
