@@ -260,7 +260,7 @@ Directory Structure
   |-- src/
   |   |-- backends/
   |       |-- tensorrt/
-  |           |-- CMakeListes.txt
+  |           |-- CMakeLists.txt
   |           |-- autofill.cc
   |           |-- base_backend.cc
   |           |-- loader.cc
@@ -269,7 +269,7 @@ Directory Structure
   |           |-- plan_backend_factory.cc
   |           |-- plan_utils.cc
   |       |-- tensorflow/
-  |           |-- CMakeListes.txt
+  |           |-- CMakeLists.txt
   |           |-- autofill.cc
   |           |-- base_backend.cc
   |           |-- graphdef_backend.cc
@@ -280,35 +280,35 @@ Directory Structure
   |           |-- tf_utils.cc
   |           |-- tf_virtual_device.cc
   |       |-- pytorch/
-  |           |-- CMakeListes.txt
+  |           |-- CMakeLists.txt
   |           |-- autofill.cc
   |           |-- libtorch_backend.cc
   |           |-- libtorch_backend_factory.cc
   |       |-- caffe2/
-  |           |-- CMakeListes.txt
+  |           |-- CMakeLists.txt
   |           |-- autofill.cc
   |           |-- netdef_backend.cc
   |           |-- netdef_backend_c2.cc
   |           |-- netdef_backend_factory.cc
   |       |-- ensemble/
-  |           |-- CMakeListes.txt
+  |           |-- CMakeLists.txt
   |           |-- ensemble_backend.cc
   |           |-- ensemble_backend_factory.cc
   |       |-- onnx/
-  |           |-- CMakeListes.txt
+  |           |-- CMakeLists.txt
   |           |-- autofill.cc
   |           |-- loader.cc
   |           |-- onnx_backend.cc
   |           |-- onnx_backend_factory.cc
   |           |-- onnx_utils.cc
   |       |-- custom/
-  |           |-- CMakeListes.txt
+  |           |-- CMakeLists.txt
   |           |-- loader.cc
   |           |-- custom.cc
   |           |-- custom_backend.cc
   |           |-- custom_backend_factory.cc
   |   |-- core/
-  |       |-- CMakeListes.txt
+  |       |-- CMakeLists.txt
   |       |-- api.proto
   |       |-- grpc_service.proto
   |       |-- server_status.proto
@@ -341,7 +341,7 @@ Directory Structure
   |       |-- tracing.cc
   |       |-- trtserver.cc
   |   |-- servers/
-  |       |-- CMakeListes.txt
+  |       |-- CMakeLists.txt
   |       |-- common.cc
   |       |-- grpc_server.cc
   |       |-- http_server.cc
